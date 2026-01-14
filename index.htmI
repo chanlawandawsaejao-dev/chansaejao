@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Luxury BMI Calculator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Anuphan:wght@300;400;600&family=Playfair+Display:ital,wght@0,700;1,700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-gradient: linear-gradient(135deg, #fce4ec 0%, #f3e5f5 100%);
+            --accent-pink: #ff80ab;
+            --luxury-gold: #d4af37;
+        }
+
+        body {
+            font-family: 'Anuphan', sans-serif;
+            background: var(--primary-gradient);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            color: #4a4a4a;
+        }
+
+        .luxury-card {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            border-radius: 30px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.05);
+            width: 100%;
+            max-width: 450px;
+            overflow: hidden;
+            transition: transform 0.3s ease;
+        }
+
+        .header-title {
+            font-family: 'Playfair Display', serif;
+            background: linear-gradient(to right, #8e24aa, #ff80ab);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .input-group input {
+            background: rgba(255, 255, 255, 0.5);
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+            outline: none;
+        }
+
+        .input-group input:focus {
+            border-color: var(--accent-pink);
+            background: white;
+            box-shadow: 0 0 15px rgba(255, 128, 171, 0.2);
+        }
+
+        .calculate-btn {
+            background: linear-gradient(45deg, #ff80ab, #ba68c8);
+            color: white;
+            font-weight: 600;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 20px rgba(255, 128, 171, 0.3);
+        }
+
+        .calculate-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 25px rgba(255, 128, 171, 0.4);
+            filter: brightness(1.05);
+        }
+
+        .result-area {
+            display: none;
+            animation: fadeIn 0.8s ease forwards;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .gauge-container {
+            width: 200px;
+            height: 100px;
+            position: relative;
+            overflow: hidden;
+            margin: 0 auto;
+        }
+
+        .gauge-bg {
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            background: #eee;
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+
+        .gauge-fill {
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            background: conic-gradient(#4caf50 0%, #ffeb3b 40%, #f44336 80%);
+            position: absolute;
+            top: 0;
+            left: 0;
+            transform: rotate(-90deg);
+        }
+
+        .gauge-mask {
+            width: 160px;
+            height: 160px;
+            background: #fff;
+            border-radius: 50%;
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            z-index: 2;
+        }
+
+        .needle {
+            width: 4px;
+            height: 90px;
+            background: #333;
+            position: absolute;
+            bottom: 0;
+            left: 98px;
+            transform-origin: bottom center;
+            transition: transform 1.5s cubic-bezier(0.17, 0.67, 0.83, 0.67);
+            z-index: 3;
+            border-radius: 4px;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 4px 16px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="luxury-card p-8">
+        <div class="text-center mb-8">
+            <h1 class="header-title text-4xl mb-2">BMI Elegance</h1>
+            <p class="text-gray-500 font-light italic">ส่องประกายสุขภาพที่ดีในแบบของคุณ</p>
+        </div>
+
+        <div class="space-y-6">
+            <div class="input-group">
+                <label class="block text-sm font-medium text-gray-600 mb-2">น้ำหนัก (กิโลกรัม)</label>
+                <input type="number" id="weight" placeholder="เช่น 55.5" 
+                       class="w-full p-4 rounded-2xl text-center text-lg">
+            </div>
+
+            <div class="input-group">
+                <label class="block text-sm font-medium text-gray-600 mb-2">ส่วนสูง (เซนติเมตร)</label>
+                <input type="number" id="height" placeholder="เช่น 165" 
+                       class="w-full p-4 rounded-2xl text-center text-lg">
+            </div>
+
+            <button onclick="calculateBMI()" class="calculate-btn w-full py-4 rounded-2xl text-lg mt-4 uppercase">
+                คำนวณผลลัพธ์
+            </button>
+        </div>
+
+        <div id="resultArea" class="result-area mt-10 text-center border-t border-gray-100 pt-8">
+            <p class="text-gray-400 text-sm uppercase tracking-widest mb-1">ดัชนีมวลกายของคุณคือ</p>
+            <h2 id="bmiValue" class="text-5xl font-bold text-gray-800 mb-4">0.0</h2>
+            
+            <div class="gauge-container mb-4">
+                <div class="gauge-bg"></div>
+                <div class="gauge-fill"></div>
+                <div class="gauge-mask"></div>
+                <div id="needle" class="needle" style="transform: rotate(-90deg)"></div>
+            </div>
+
+            <div id="statusBadge" class="status-badge"></div>
+            
+            <div class="mt-6 p-4 bg-white/50 rounded-2xl">
+                <p id="adviceText" class="text-gray-600 text-sm italic font-light"></p>
+            </div>
+
+            <button onclick="resetUI()" class="mt-6 text-gray-400 hover:text-pink-400 transition-colors text-sm underline">
+                คำนวณใหม่
+            </button>
+        </div>
+    </div>
+
+    <script>
+        function calculateBMI() {
+            const weight = parseFloat(document.getElementById('weight').value);
+            const height = parseFloat(document.getElementById('height').value) / 100;
+
+            if (!weight || !height || weight <= 0 || height <= 0) {
+                showModal("กรุณากรอกข้อมูลให้ครบถ้วนและถูกต้องนะคะ ✨");
+                return;
+            }
+
+            const bmi = (weight / (height * height)).toFixed(1);
+            displayResult(bmi);
+        }
+
+        function displayResult(bmi) {
+            const resultArea = document.getElementById('resultArea');
+            const bmiValueDisplay = document.getElementById('bmiValue');
+            const statusBadge = document.getElementById('statusBadge');
+            const adviceText = document.getElementById('adviceText');
+            const needle = document.getElementById('needle');
+
+            resultArea.style.display = 'block';
+            bmiValueDisplay.innerText = bmi;
+
+            let status = "";
+            let color = "";
+            let advice = "";
+            let rotation = -90; // Default min
+
+            if (bmi < 18.5) {
+                status = "น้ำหนักน้อยกว่าเกณฑ์";
+                color = "#81d4fa";
+                advice = "ดูเหมือนคุณจะตัวเล็กไปนิดนะคะ ลองทานอาหารที่มีประโยชน์และพักผ่อนให้เพียงพอค่ะ";
+                rotation = -70;
+            } else if (bmi >= 18.5 && bmi < 23) {
+                status = "สุขภาพดี (สมส่วน)";
+                color = "#a5d6a7";
+                advice = "ยอดเยี่ยมมากค่ะ! คุณดูแลตัวเองได้ดีมาก รักษาสมดุลนี้ไว้ต่อไปนะคะ";
+                rotation = -30;
+            } else if (bmi >= 23 && bmi < 25) {
+                status = "น้ำหนักเกิน";
+                color = "#fff59d";
+                advice = "เริ่มมีน้ำหนักเกินนิดหน่อยแล้วค่ะ ลองขยับร่างกายวันละนิดชีวิตจะสดใสขึ้นนะคะ";
+                rotation = 15;
+            } else if (bmi >= 25 && bmi < 30) {
+                status = "อ้วนระดับ 1";
+                color = "#ffcc80";
+                advice = "ช่วงนี้อาจจะต้องดูแลเรื่องการรับประทานอาหารเป็นพิเศษ เพื่อสุขภาพที่ดีในระยะยาวค่ะ";
+                rotation = 50;
+            } else {
+                status = "อ้วนระดับ 2 (อันตราย)";
+                color = "#ef9a9a";
+                advice = "สุขภาพสำคัญที่สุดค่ะ ลองปรึกษาผู้เชี่ยวชาญหรือออกกำลังกายอย่างสม่ำเสมอนะคะ";
+                rotation = 90;
+            }
+
+            statusBadge.innerText = status;
+            statusBadge.style.backgroundColor = color;
+            adviceText.innerText = advice;
+            
+            // Animate needle
+            setTimeout(() => {
+                needle.style.transform = `rotate(${rotation}deg)`;
+            }, 100);
+
+            // Scroll to result
+            resultArea.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function resetUI() {
+            document.getElementById('weight').value = '';
+            document.getElementById('height').value = '';
+            document.getElementById('resultArea').style.display = 'none';
+            document.getElementById('needle').style.transform = `rotate(-90deg)`;
+        }
+
+        function showModal(message) {
+            // Simple luxury custom alert substitute
+            const div = document.createElement('div');
+            div.className = "fixed inset-0 flex items-center justify-center z-50 p-4 bg-black/20 backdrop-blur-sm";
+            div.innerHTML = `
+                <div class="bg-white p-8 rounded-3xl shadow-2xl max-w-xs w-full text-center">
+                    <p class="text-gray-700 mb-6">${message}</p>
+                    <button onclick="this.parentElement.parentElement.remove()" class="calculate-btn px-8 py-2 rounded-xl">เข้าใจแล้วค่ะ</button>
+                </div>
+            `;
+            document.body.appendChild(div);
+        }
+    </script>
+</body>
+</html>
